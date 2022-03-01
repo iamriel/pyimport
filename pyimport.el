@@ -229,10 +229,10 @@ This is a simple heuristic: we just look for imports in all open Python buffers.
           (message "%s (from %s)" line (get-text-property 0 'pyimport-path line)))
       (user-error "No matches found for %s" symbol))))
 
-(defun pyimport--extract-unused-var (flycheck-message)
-  "Extract the import variable name from FLYCHECK-MESSAGE.
-FLYCHECK-MESSAGE should take the form \"'foo' imported but unused\"."
-  (->> flycheck-message
+(defun pyimport--extract-unused-var (flake8-message)
+  "Extract the import variable name from FLAKE8-MESSAGE.
+FLAKE8-MESSAGE should take the form \"'module.foo' imported but unused\"."
+  (->> flake8-message
        (s-match "'\\(.*\\)' imported but unused")
        -last-item
        (s-split (rx "."))
@@ -312,15 +312,15 @@ Required for `pyimport-remove-unused'.")
   (unless pyimport-flake8-path
     (user-error "You need to install flake8 or set pyimport-flake8-path"))
 
-  (let (flycheck-output)
+  (let (flake8-output)
     (shut-up
       (shell-command-on-region
        (point-min) (point-max) pyimport-flake8-path "*pyimport*"))
     (with-current-buffer "*pyimport*"
-      (setq flycheck-output (buffer-string)))
+      (setq flake8-output (buffer-string)))
     (kill-buffer "*pyimport*")
 
-    (let* ((raw-lines (s-split "\n" (s-trim flycheck-output)))
+    (let* ((raw-lines (s-split "\n" (s-trim flake8-output)))
            (lines (--map (s-split ":" it) raw-lines))
            (import-lines (--filter (s-ends-with-p "imported but unused" (-last-item it)) lines))
            (unused-imports (--map (cons (read (nth 1 it))

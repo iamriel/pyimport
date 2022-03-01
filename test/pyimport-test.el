@@ -6,7 +6,7 @@
   "Ensure we parse flake8 output for older pyflakes versions."
   (should
    (equal
-    (pyimport--extract-unused-var "'foo' imported but unused")
+    (pyimport--extract-unused-var "'module.foo' imported but unused")
     "foo")))
 
 (ert-deftest pyimport-remove-import-case-sensitive ()
