@@ -296,10 +296,10 @@ on line number LINE, remove VAR (e.g. 'baz')."
           (pyimport--delete-current-line)))))))
 
 ;; TODO: defcustom
-(defvar pyimport-pyflakes-path
-  (executable-find "pyflakes")
-  "Path to pyflakes executable.
-If pyflakes is alread on your $PATH, this should work with
+(defvar pyimport-flake8-path
+  (executable-find "flake8")
+  "Path to flake8 executable.
+If flake8 is alread on your $PATH, this should work with
 modification.
 
 Required for `pyimport-remove-unused'.")
@@ -309,13 +309,13 @@ Required for `pyimport-remove-unused'.")
   "Remove unused imports in the current Python buffer."
   (interactive)
 
-  (unless pyimport-pyflakes-path
-    (user-error "You need to install pyflakes or set pyimport-pyflakes-path"))
+  (unless pyimport-flake8-path
+    (user-error "You need to install flake8 or set pyimport-flake8-path"))
 
   (let (flycheck-output)
     (shut-up
       (shell-command-on-region
-       (point-min) (point-max) pyimport-pyflakes-path "*pyimport*"))
+       (point-min) (point-max) pyimport-flake8-path "*pyimport*"))
     (with-current-buffer "*pyimport*"
       (setq flycheck-output (buffer-string)))
     (kill-buffer "*pyimport*")

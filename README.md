@@ -11,14 +11,14 @@ Installation: install from MELPA, or add pyimport.el to your
 
 ## Unused Imports
 
-Requires pyflakes to be installed.
+Requires flake8 to be installed.
 
 ![screenshot](remove_unused.gif)
 
 Run `M-x pyimport-remove-unused`.
 
-This requires `pyflakes` to be on `PATH`. Alternatively, set
-`pyimport-pyflakes-path`.
+This requires `flake8` to be on `PATH`. Alternatively, set
+`pyimport-flake8-path`.
 
 ## Insert Missing Imports
 

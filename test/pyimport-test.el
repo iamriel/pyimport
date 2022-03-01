@@ -3,18 +3,11 @@
 (require 'shut-up)
 
 (ert-deftest pyimport-var-extraction ()
-  "Ensure we parse pyflakes output for older pyflakes versions."
+  "Ensure we parse flake8 output for older pyflakes versions."
   (should
    (equal
     (pyimport--extract-unused-var "'foo' imported but unused")
     "foo")))
-
-(ert-deftest pyimport-var-extraction-new ()
-  "Ensure we parse pyflakes output for recent pyflakes versions."
-  (should
-   (equal
-    (pyimport--extract-unused-var "'foo.bar' imported but unused")
-    "bar")))
 
 (ert-deftest pyimport-remove-import-case-sensitive ()
   "Ensure we remove imports case-sensitively"
