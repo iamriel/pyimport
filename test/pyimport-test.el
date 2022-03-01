@@ -41,13 +41,13 @@
     (should
      (equal (buffer-string) ""))))
 
-(ert-deftest pyimport-remove-on-line-first ()
-  "We should remove the first occurrence, if present."
+(ert-deftest pyimport-remove-on-line-last ()
+  "We should remove the last occurrence, if present."
   (with-temp-buffer
     (insert "foo bar baz bar")
     (pyimport--remove-on-line "bar")
     (should
-     (equal (buffer-string) "foo  baz bar"))))
+     (equal (buffer-string) "foo bar baz "))))
 
 (ert-deftest pyimport-import-lines ()
   (with-temp-buffer

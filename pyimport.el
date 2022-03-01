@@ -241,15 +241,17 @@ FLAKE8-MESSAGE should take the form \"'module.foo' imported but unused\"."
        -last-item))
 
 (defun pyimport--remove-on-line (text)
-  "Remove the first occurrence of TEXT on the current line, if present.
-Returns t on success, nil otherwise."
+  "Remove the last occurrence of TEXT on the current line, if present.
+Returns t on success, nil otherwise.
+We remove last occurrence as we have imports like this:
+from django.core.cache import cache"
   (save-excursion
-    (move-beginning-of-line nil)
-    (let ((next-line-pos (save-excursion (forward-line 1) (point))))
-      ;; Search forward, until we find the text on this line.
-      (when (search-forward text next-line-pos t)
+    (move-end-of-line nil)
+    (let ((next-line-pos (save-excursion (forward-line -1) (point))))
+      ;; Search backward, until we find the text on this line.
+      (when (search-backward text next-line-pos t)
         ;; If we found it, delete it.
-        (delete-char (- (length text)))
+        (delete-char (length text))
         t))))
 
 (defun pyimport--delete-current-line ()
