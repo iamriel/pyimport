@@ -297,8 +297,7 @@ on line number LINE, remove VAR (e.g. 'baz')."
                   (looking-at (rx "import " (1+ (not (any space))) " as" (1+ space) line-end)))
           (pyimport--delete-current-line)))))))
 
-;; TODO: defcustom
-(defvar pyimport-flake8-path
+(defcustom pyimport-flake8-path
   (executable-find "flake8")
   "Path to flake8 executable.
 If flake8 is alread on your $PATH, this should work with
@@ -323,7 +322,7 @@ Required for `pyimport-remove-unused'.")
     (kill-buffer "*pyimport*")
 
     (let* ((raw-lines (s-split "\n" (s-trim flake8-output)))
-           (lines (--map (s-split-up-to ":" it 2) raw-lines))
+           (lines (--map (s-split-up-to ":" it 3) raw-lines))
            (import-lines (--filter (s-ends-with-p "imported but unused" (-last-item it)) lines))
            (unused-imports (--map (cons (read (nth 1 it))
                                         (pyimport--extract-unused-var (nth 3 it))) import-lines)))
