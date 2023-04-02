@@ -316,7 +316,7 @@ Required for `pyimport-remove-unused'.")
   (let (flake8-output)
     (shut-up
       (shell-command-on-region
-       (point-min) (point-max) pyimport-flake8-path "*pyimport*"))
+       (point-min) (point-max) (format "%s - " pyimport-flake8-path) "*pyimport*"))
     (with-current-buffer "*pyimport*"
       (setq flake8-output (buffer-string)))
     (kill-buffer "*pyimport*")

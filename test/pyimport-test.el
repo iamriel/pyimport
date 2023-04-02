@@ -17,6 +17,14 @@
     (should
      (equal (buffer-string) ""))))
 
+(ert-deftest pyimport-remove-import-same-name ()
+  "Ensure we remove imports correctly when the name is the same as the module."
+  (with-temp-buffer
+    (insert "from datetime import datetime")
+    (pyimport--remove-import 1 "datetime")
+    (should
+     (equal (buffer-string) ""))))
+
 (ert-deftest pyimport-remove-import-extra-whitespace ()
   "Ensure we remove imports correctly even when there's extra whitespace."
   (with-temp-buffer
@@ -40,6 +48,14 @@
     (pyimport--remove-import 1 "bar")
     (should
      (equal (buffer-string) ""))))
+
+(ert-deftest pyimport-remove-on-line-same-name ()
+  "Ensure we remove the correct occurrence when the name is the same as the module."
+  (with-temp-buffer
+    (insert "from datetime import datetime")
+    (pyimport--remove-on-line "datetime")
+    (should
+     (equal (buffer-string) "from datetime import "))))
 
 (ert-deftest pyimport-remove-on-line-last ()
   "We should remove the last occurrence, if present."
