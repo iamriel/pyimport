@@ -260,6 +260,19 @@ from django.core.cache import cache"
           (next-line-start (progn (forward-line 1) (point))))
       (delete-region line-start next-line-start))))
 
+
+(defun get-last-non-whitespace-char-of-previous-line ()
+  "Get the last non-whitespace character in the previous line."
+  (interactive)
+  (save-excursion
+    (forward-line -1)
+    (end-of-line)
+    (skip-chars-backward " \t")
+    (if (bolp)
+        nil
+      (char-to-string (char-before)))))
+
+
 (defun pyimport--remove-import (line var)
   "Given a line of Python code of the form
 
@@ -271,7 +284,32 @@ on line number LINE, remove VAR (e.g. 'baz')."
       (goto-char (point-min))
       (forward-line (1- line))
 
+      ;; Search forward for the variable name.
+      ;; this is useful when the import is on multiple lines, e.g.
+      ;; from foo import (
+      ;;     unused,
+      ;; )
+      (while (and (search-forward "import" nil t)
+                  (not (re-search-forward (concat "\\b" var "\\b") nil t)))
+        (forward-line 1))
+
       (cond
+       ;; If it's just the variable name, e.g. "var" or "var," remove the whole line.
+       ((string= (string-remove-suffix "," (string-trim (thing-at-point 'line))) var)
+        (pyimport--delete-current-line)
+
+        ;; If the result of the deletion is an empty import, with multiple lines, e.g.
+        ;; from foo import (
+        ;; )
+        ;; remove the whole thing.
+        (when (and
+               (string= (string-trim (thing-at-point 'line)) ")")
+               (string= (get-last-non-whitespace-char-of-previous-line) "("))
+          (progn
+            (previous-line)
+            (kill-line 1)
+            (kill-line 1))))
+
        ;; If it's just 'import foo' or 'import foo.bar', just remove it.
        ((looking-at (rx "import"
                         (+ space)
@@ -288,6 +326,8 @@ on line number LINE, remove VAR (e.g. 'baz')."
         (or (pyimport--remove-on-line (format ", %s" var))
             (pyimport--remove-on-line (format "%s, " var))
             (pyimport--remove-on-line var))
+
+        (beginning-of-line)
         ;; If we only have "from foo import " left, remove the rest of the line.
         (when (or (looking-at (rx "from" (+ space)
                                   (+ (or (syntax word) (syntax symbol) (syntax punctuation))) (+ space)
