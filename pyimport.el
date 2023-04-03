@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;; pyimport.el --- Manage Python imports!
 
 ;; Copyright (C) 2016 Wilfred Hughes <me@wilfred.me.uk>
@@ -201,7 +202,7 @@ This is a simple heuristic: we just look for imports in all open Python buffers.
         (matching-lines nil)
         (case-fold-search nil))
     (unless symbol
-      (user-error "No symbol at point"))
+      (user-error-string "No symbol at point"))
     (setq symbol (substring-no-properties symbol))
     ;; Find all the import lines in all Python buffers
     (dolist (buffer (pyimport--buffers-in-mode 'python-mode))
@@ -227,7 +228,7 @@ This is a simple heuristic: we just look for imports in all open Python buffers.
                  (-first-item matching-lines))))
           (pyimport--insert-import line)
           (message "%s (from %s)" line (get-text-property 0 'pyimport-path line)))
-      (user-error "No matches found for %s" symbol))))
+      (user-error-string "No matches found for %s" symbol))))
 
 (defun pyimport--extract-unused-var (flake8-message)
   "Extract the import variable name from FLAKE8-MESSAGE.
@@ -345,13 +346,16 @@ modification.
 
 Required for `pyimport-remove-unused'.")
 
+(defcustom pyimport-after-remove-unused-hook nil
+  "Hook run after `pyimport-remove-unused' is run.")
+
 ;;;###autoload
 (defun pyimport-remove-unused ()
   "Remove unused imports in the current Python buffer."
   (interactive)
 
   (unless pyimport-flake8-path
-    (user-error "You need to install flake8 or set pyimport-flake8-path"))
+    (user-error-string "You need to install flake8 or set pyimport-flake8-path"))
 
   (let (flake8-output)
     (shut-up
@@ -370,7 +374,10 @@ Required for `pyimport-remove-unused'.")
       ;; numbers stay correct, even when we delete lines.
       (--each (reverse unused-imports)
         (-let [(line . var ) it]
-          (pyimport--remove-import line var))))))
+          (pyimport--remove-import line var)))
+      (when unused-imports
+        (run-hooks 'pyimport-after-remove-unused-hook))
+      )))
 
 (provide 'pyimport)
 ;;; pyimport.el ends here
